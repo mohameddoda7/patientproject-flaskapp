@@ -1,0 +1,25 @@
+<head>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<h2 style="color: #0b6bac; text-align: center;">Search</h2>
+
+    <form method="POST" action="{{ url_for('get_patient') }}">
+
+        {{ form.hidden_tag() }}
+
+        <div class="form-group">
+            {{ form.user_id.label (class="form-control-label") }}
+            {{ form.user_id(class="form-control") }}
+
+        </div>
+       
+        
+
+        <div class="form-group">
+            {{ form.submit(class="btn btn-primary") }}
+
+        </div>
+
+
+    </form>
