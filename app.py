@@ -1,9 +1,8 @@
-from flask import Flask,render_template,request,redirect,jsonify
+from flask import Flask, render_template, request, redirect, jsonify
 from forms import get, myform
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from datetime import datetime
-
 
 DATABASE_URL = 'sqlite:///DB.db'
 app = Flask(__name__)
@@ -13,30 +12,30 @@ db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
 class Patient(db.Model):
-    user_id = db.Column(db.Integer , primary_key=True)
-    username = db.Column(db.String(200) , nullable=False)
-    email = db.Column(db.String(200) , nullable=False)
-    password = db.Column(db.String(200) , nullable=False)
-    confirmpassword = db.Column(db.String(200) , nullable=False)
-    firstname = db.Column(db.String(200) , nullable=False)
-    lastname = db.Column(db.String(200) , nullable=False)
-    
-    birthdate = db.Column(db.Date , nullable=False)
+    user_id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(200), nullable=False)
+    email = db.Column(db.String(200), nullable=False)
+    password = db.Column(db.String(200), nullable=False)
+    confirmpassword = db.Column(db.String(200), nullable=False)
+    firstname = db.Column(db.String(200), nullable=False)
+    lastname = db.Column(db.String(200), nullable=False)
+    birthdate = db.Column(db.Date, nullable=False)
 
     def __repr__(self):
-        return f"patient('{self.username}"
+        return f"patient('{self.username}')"
 
 with app.app_context():
     db.create_all()
 
 patients = []
-@app.route('/commoninfo/add' , methods = ['GET' , 'POST'])
+
+@app.route('/', methods=['GET', 'POST'])
 def register():
     form = myform()
     if request.method == 'GET':
-        return render_template('register.html' , form=form)
+        return render_template('register.html', form=form)
     
-    elif request.method == 'POST' and form.validate_on_submit() :
+    elif request.method == 'POST' and form.validate_on_submit():
         username = form.username.data
         email = form.email.data
         password = form.password.data
@@ -46,27 +45,14 @@ def register():
         user_id = form.user_id.data
         birthdate = form.birthdate.data
         
-        
-        patient = Patient(username=username, email=email, password=password, confirmpassword=confirmpassword, firstname=firstname, lastname=lastname,user_id=user_id,birthdate=birthdate)
-        id=Patient.query.filter_by(user_id=user_id).first()
-        if id:
+        patient = Patient.query.filter_by(user_id=user_id).first()
+        if patient:
             return "Patient has already registered"
         else:
-            
-            db.session.add(patient)
+            new_patient = Patient(username=username, email=email, password=password, confirmpassword=confirmpassword, firstname=firstname, lastname=lastname, user_id=user_id, birthdate=birthdate)
+            db.session.add(new_patient)
             db.session.commit()
-            patients.append({
-                'username': username,
-                'email': email,
-                'password': password,
-                'confirmpassword': confirmpassword,
-                'firstname': firstname,
-                'lastname': lastname,
-                'user_id': user_id,
-                'birthdate': birthdate
-            })
-        return redirect('/commoninfo/fetch')
-
+            return redirect('/commoninfo/fetch')
 
 @app.route('/commoninfo/fetch', methods=['GET', 'POST'])
 def get_patient():
@@ -77,19 +63,9 @@ def get_patient():
         user_id = form.user_id.data
         patient = Patient.query.filter_by(user_id=user_id).first()
         if patient:
-            return f"patient name: {patient.username}, user_id: {patient.user_id}, birthdate:{patient.birthdate.strftime('%Y-%m-%d')}"
+            return f"Patient name: {patient.username}, user_id: {patient.user_id}, birthdate: {patient.birthdate.strftime('%Y-%m-%d')}"
         else:
             return "No patient found"
-        
-       
 
 if __name__ == '__main__':    
-    app.run(host="0.0.0.0", port=5000,debug=True)
-
-
-
-
-
-
-
-
+    app.run(host="0.0.0.0", port=5000, debug=True)
