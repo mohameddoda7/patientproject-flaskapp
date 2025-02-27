@@ -35,24 +35,28 @@ def register():
     if request.method == 'GET':
         return render_template('register.html', form=form)
     
-    elif request.method == 'POST' and form.validate_on_submit():
-        username = form.username.data
-        email = form.email.data
-        password = form.password.data
-        confirmpassword = form.confirmpassword.data
-        firstname = form.firstname.data
-        lastname = form.lastname.data
-        user_id = form.user_id.data
-        birthdate = form.birthdate.data
-        
-        patient = Patient.query.filter_by(user_id=user_id).first()
-        if patient:
-            return "Patient has already registered"
+    elif request.method == 'POST':
+        print(form.errors)  # Debugging: print validation errors
+        if form.validate_on_submit():
+            username = form.username.data
+            email = form.email.data
+            password = form.password.data
+            confirmpassword = form.confirmpassword.data
+            firstname = form.firstname.data
+            lastname = form.lastname.data
+            user_id = form.user_id.data
+            birthdate = form.birthdate.data
+            
+            patient = Patient.query.filter_by(user_id=user_id).first()
+            if patient:
+                return "Patient has already registered"
+            else:
+                new_patient = Patient(username=username, email=email, password=password, confirmpassword=confirmpassword, firstname=firstname, lastname=lastname, user_id=user_id, birthdate=birthdate)
+                db.session.add(new_patient)
+                db.session.commit()
+                return redirect('/commoninfo/fetch')
         else:
-            new_patient = Patient(username=username, email=email, password=password, confirmpassword=confirmpassword, firstname=firstname, lastname=lastname, user_id=user_id, birthdate=birthdate)
-            db.session.add(new_patient)
-            db.session.commit()
-            return redirect('/commoninfo/fetch')
+            return "Form validation failed", 400
 
 @app.route('/commoninfo/fetch', methods=['GET', 'POST'])
 def get_patient():
